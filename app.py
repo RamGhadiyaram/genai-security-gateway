@@ -190,7 +190,8 @@ async def process_prompt(request: PromptRequest) -> GatewayResponse:
     threats = regex_threats + semantic_threats + pii_threats
     risk_score = RiskEngine.evaluate(regex_score, semantic_score, pii_score)
 
-    if risk_score >= 0.8:
+    high_confidence_signature = regex_score >= 0.5
+    if risk_score >= 0.8 or high_confidence_signature:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={
