@@ -1,0 +1,35 @@
+digraph GenAISecurityGateway {
+  rankdir=TB
+  bgcolor="#FFFFFF"
+  node [shape=box, style="rounded,filled", fontname="Arial", color="#1B365D", penwidth=2]
+  edge [color="#1B365D", penwidth=1.5]
+
+  User [label="User input", fillcolor="#D9F0FF"]
+  API [label="FastAPI layer", fillcolor="#D9F0FF"]
+  Normalizer [label="Input normalizer", fillcolor="#FFF4B8"]
+  Regex [label="Regex detector", fillcolor="#FFF4B8"]
+  Semantic [label="Semantic detector", fillcolor="#FFF4B8"]
+  PII [label="PII detector", fillcolor="#FFF4B8"]
+  RiskEngine [label="Risk engine", fillcolor="#FFD59A"]
+  Gate [label="Action gate", shape=diamond, fillcolor="#FFD59A"]
+  Block [label="Block and log", fillcolor="#FFB4A2"]
+  Quarantine [label="Quarantine", fillcolor="#FFD59A"]
+  RAG [label="RAG retrieval", fillcolor="#D9F0FF"]
+  DocumentGuardrail [label="Document guardrail", fillcolor="#FFF4B8"]
+  LLM [label="LLM or application logic", fillcolor="#D9F0FF"]
+  OutputGuardrail [label="Output guardrail", fillcolor="#FFF4B8"]
+  Client [label="Safe client response", fillcolor="#D9F0FF"]
+
+  User -> API -> Normalizer
+  Normalizer -> Regex
+  Normalizer -> Semantic
+  Normalizer -> PII
+  Regex -> RiskEngine
+  Semantic -> RiskEngine
+  PII -> RiskEngine
+  RiskEngine -> Gate
+  Gate -> Block [label="high risk"]
+  Gate -> Quarantine [label="medium risk"]
+  Gate -> RAG [label="low risk"]
+  RAG -> DocumentGuardrail -> LLM -> OutputGuardrail -> Client
+}

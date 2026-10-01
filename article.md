@@ -26,28 +26,9 @@ The complete working implementation, tests, and setup instructions are available
 
 ## Architecture at a glance
 
-![GenAI Security Gateway architecture](https://quickchart.io/graphviz?format=svg&graph=digraph%20G%20%7Brankdir%3DTB%3Bnode%5Bshape%3Dbox%2Cstyle%3D%22rounded%2Cfilled%22%5D%3BUser-%3EAPI-%3ENormalizer-%3ERiskEngine-%3EGate%3BGate-%3EBlock%3BGate-%3EQuarantine%3BGate-%3ERAG-%3EDocumentGuardrail-%3ELLM-%3EOutputGuardrail-%3EClient%3B%7D)
+![GenAI Security Gateway architecture](https://quickchart.io/graphviz?format=svg&graph=digraph%20G%20%7Brankdir%3DTB%3Bbgcolor%3D%22%23FFFFFF%22%3Bnode%5Bshape%3Dbox%2Cstyle%3D%22rounded%2Cfilled%22%2Cfontname%3D%22Arial%22%2Ccolor%3D%22%231B365D%22%2Cpenwidth%3D2%5D%3Bedge%5Bcolor%3D%22%231B365D%22%2Cpenwidth%3D1.5%5D%3BUser%5Blabel%3D%22User%20input%22%2Cfillcolor%3D%22%23D9F0FF%22%5D%3BAPI%5Blabel%3D%22FastAPI%20layer%22%2Cfillcolor%3D%22%23D9F0FF%22%5D%3BNormalizer%5Blabel%3D%22Input%20normalizer%22%2Cfillcolor%3D%22%23FFF4B8%22%5D%3BRegex%5Blabel%3D%22Regex%20detector%22%2Cfillcolor%3D%22%23FFF4B8%22%5D%3BSemantic%5Blabel%3D%22Semantic%20detector%22%2Cfillcolor%3D%22%23FFF4B8%22%5D%3BPII%5Blabel%3D%22PII%20detector%22%2Cfillcolor%3D%22%23FFF4B8%22%5D%3BRiskEngine%5Blabel%3D%22Risk%20engine%22%2Cfillcolor%3D%22%23FFD59A%22%5D%3BGate%5Blabel%3D%22Action%20gate%22%2Cshape%3Ddiamond%2Cfillcolor%3D%22%23FFD59A%22%5D%3BBlock%5Blabel%3D%22Block%20and%20log%22%2Cfillcolor%3D%22%23FFB4A2%22%5D%3BQuarantine%5Blabel%3D%22Quarantine%22%2Cfillcolor%3D%22%23FFD59A%22%5D%3BRAG%5Blabel%3D%22RAG%20retrieval%22%2Cfillcolor%3D%22%23D9F0FF%22%5D%3BDocumentGuardrail%5Blabel%3D%22Document%20guardrail%22%2Cfillcolor%3D%22%23FFF4B8%22%5D%3BLLM%5Blabel%3D%22LLM%20or%20application%20logic%22%2Cfillcolor%3D%22%23D9F0FF%22%5D%3BOutputGuardrail%5Blabel%3D%22Output%20guardrail%22%2Cfillcolor%3D%22%23FFF4B8%22%5D%3BClient%5Blabel%3D%22Safe%20client%20response%22%2Cfillcolor%3D%22%23D9F0FF%22%5D%3BUser-%3EAPI-%3ENormalizer%3BNormalizer-%3ERegex%3BNormalizer-%3ESemantic%3BNormalizer-%3EPII%3BRegex-%3ERiskEngine%3BSemantic-%3ERiskEngine%3BPII-%3ERiskEngine%3BRiskEngine-%3EGate%3BGate-%3EBlock%5Blabel%3D%22high%20risk%22%5D%3BGate-%3EQuarantine%5Blabel%3D%22medium%20risk%22%5D%3BGate-%3ERAG%5Blabel%3D%22low%20risk%22%5D%3BRAG-%3EDocumentGuardrail-%3ELLM-%3EOutputGuardrail-%3EClient%3B%7D)
 
-The diagram is rendered through the QuickChart Graphviz API. The equivalent DOT source is kept below so the architecture remains versionable and reproducible:
-
-```dot
-digraph GenAISecurityGateway {
-    rankdir=TB
-    node [shape=box, style="rounded,filled", fontname="Arial"]
-    User -> API -> Normalizer
-    Normalizer -> Regex
-    Normalizer -> Semantic
-    Normalizer -> PII
-    Regex -> RiskEngine
-    Semantic -> RiskEngine
-    PII -> RiskEngine
-    RiskEngine -> Gate
-    Gate -> Block [label="high confidence or score >= 0.80"]
-    Gate -> Quarantine [label="0.50 <= score < 0.80"]
-    Gate -> RAG [label="score < 0.50"]
-    RAG -> DocumentGuardrail -> LLM -> OutputGuardrail -> Client
-}
-```
+The diagram is rendered through the QuickChart Graphviz API. The [DOT source is available in the repository](https://github.com/RamGhadiyaram/genai-security-gateway/blob/main/docs/genai-security-gateway.dot) so the image remains versionable and reproducible without crowding the article.
 
 ## 1. Normalize before detection
 
@@ -86,7 +67,7 @@ $$
 
 The result is clamped to $[0, 1]$ so the action thresholds remain predictable:
 
-![Risk action gate](https://quickchart.io/graphviz?format=svg&graph=digraph%20G%20%7Brankdir%3DLR%3Bnode%5Bshape%3Dbox%2Cstyle%3D%22rounded%2Cfilled%22%5D%3BDetectors-%3ERiskEngine-%3EActionGate%3BActionGate-%3EBlock%5Blabel%3D%22high%20confidence%20or%20%3E%3D%200.80%22%5D%3BActionGate-%3EQuarantine%5Blabel%3D%220.50%20-%200.79%22%5D%3BActionGate-%3EAllow%5Blabel%3D%22%3C%200.50%22%5D%3B%7D)
+![Risk action gate](https://quickchart.io/graphviz?format=svg&graph=digraph%20G%20%7Brankdir%3DLR%3Bbgcolor%3D%22%23FFFFFF%22%3Bnode%5Bshape%3Dbox%2Cstyle%3D%22rounded%2Cfilled%22%2Cfontname%3D%22Arial%22%2Ccolor%3D%22%231B365D%22%2Cpenwidth%3D2%5D%3Bedge%5Bcolor%3D%22%231B365D%22%2Cpenwidth%3D1.5%5D%3BDetectors%5Blabel%3D%22Detector%20scores%22%2Cfillcolor%3D%22%23FFF4B8%22%5D%3BRiskEngine%5Blabel%3D%22Weighted%20risk%20engine%22%2Cfillcolor%3D%22%23FFD59A%22%5D%3BActionGate%5Blabel%3D%22Action%20gate%22%2Cshape%3Ddiamond%2Cfillcolor%3D%22%23FFD59A%22%5D%3BBlock%5Blabel%3D%22HTTP%20403%20block%22%2Cfillcolor%3D%22%23FFB4A2%22%5D%3BQuarantine%5Blabel%3D%22Manual%20review%22%2Cfillcolor%3D%22%23FFD59A%22%5D%3BAllow%5Blabel%3D%22Continue%20to%20RAG%22%2Cfillcolor%3D%22%23D9F0FF%22%5D%3BDetectors-%3ERiskEngine-%3EActionGate%3BActionGate-%3EBlock%5Blabel%3D%22high%20confidence%20or%20%3E%3D%200.80%22%5D%3BActionGate-%3EQuarantine%5Blabel%3D%220.50%20-%200.79%22%5D%3BActionGate-%3EAllow%5Blabel%3D%22%3C%200.50%22%5D%3B%7D)
 
 Direct high-confidence signatures are blocked even when their weighted score is below the general `0.80` threshold. This prevents a known jailbreak phrase from receiving a misleadingly safe result merely because other detectors are quiet.
 
